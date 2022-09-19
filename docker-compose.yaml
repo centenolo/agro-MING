@@ -1,0 +1,68 @@
+version: "3"
+services:
+  nodered: 
+    build: ./nodered
+    image: localbuild/nodered:agosto2022
+    container_name: nodered
+    restart: always
+    ports: 
+      - "1880:1880"
+    volumes:
+      - noderedData:/data
+    networks:
+      - edge
+  grafana:
+    build: ./grafana
+    image: localbuild/grafana:agosto2022
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes: 
+      - grafanaData:/var/lib/grafana
+    networks:
+      - edge
+  influxdb:
+    build: ./influxdb
+    image: localbuild/influxdb:agosto2022_2
+    container_name: influxdb
+    restart: always
+    environment:
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: admin
+      DOCKER_INFLUXDB_INIT_ORG: agrotec
+      DOCKER_INFLUXDB_INIT_BUCKET: agro01
+      DOCKER_INFLUXDB_INIT_RETENTION: 1w
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: 
+    ports:
+      - "8082:8082"
+      - "8086:8086"
+      - "8089:8089"
+    volumes:
+      - influxData:/var/lib/influxdb
+    networks: 
+      - edge
+  mosquitto:
+    build: ./mosquitto
+    image: localbuild/mosquitto:agosto2022
+    container_name: mosquitto
+    restart: always
+    ports: 
+      - "8883:1883"
+      - "9001:9001"
+    volumes: 
+      - mosquittoLog:/mosquitto/log
+      - mosquittoData:/mosquitto/data
+    networks:
+      - edge
+#Create internal link network for Containers
+networks:
+  edge:
+
+#Create Volumes for persistent Storage
+volumes:
+  grafanaData:
+  noderedData:
+  influxData:
+  mosquittoLog:
+  mosquittoData:
